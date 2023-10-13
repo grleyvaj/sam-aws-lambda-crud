@@ -1,0 +1,45 @@
+[tool.coverage.run]
+branch = true
+source = ["api", "tests"]
+
+[tool.coverage.report]
+exclude_lines = ['if TYPE_CHECKING:']
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-fail-under=100 --cov-report html:build/coverage/apps/sam-aws-lambda-crud/html --cov-report xml:build/coverage/apps/sam-aws-lambda-crud/coverage.xml --junitxml=build/reports/apps/sam-aws-lambda-crud/unittests/junit.xml --html=build/reports/apps/sam-aws-lambda-crud/unittests/html/index.html --cov-report term:skip-covered"
+pythonpath = ["api", "tests"]
+cache_dir = "build/.pytest_cache"
+
+[tool.poetry]
+name = "sam-aws-lambda-crud"
+version = "1.0.0"
+description = "Categorization transactions"
+authors = ["Gloria Leyva <leyvajerezgr@gmail.com>"]
+license = 'ISC'
+readme = 'README.md'
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "2.31.0"
+python-dotenv = "^1.0.0"
+boto3 = "^1.28.30"
+moto = {extras = ["dynamodb", "firehose", "s3"], version = "^4.2.0"}
+pytest-dotenv = "^0.5.2"
+tox = "^4.11.1"
+coverage = "^7.3.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.4.0"
+pytest-env = "^0.6.2"
+pytest-cov = "^3.0.0"
+pytest-html = "^3.1.1"
+pytest-sugar = "^0.9.5"
+ruff = "^0.0.284"
+
+[tool.poetry.group.dev.dependencies]
+aws-lambda-powertools = {extras = ["all"], version = "^2.22.0"}
+
+[build-system]
+requires = ["poetry-core==1.1.0"]
+build-backend = "poetry.core.masonry.api"

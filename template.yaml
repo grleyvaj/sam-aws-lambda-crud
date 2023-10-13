@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Sample SAM Template for sam-aws-lambda-crud
+
+Parameters:
+  APIStageName:
+    Default: dev
+    Description: StageName of API Book deployment
+    Type: String
+  TableBookTest:
+    Default: book
+    Description: Table for storage books
+    Type: String
+
+Resources:
+  MySimpleBookApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: MySimpleBookApi
+      Description: Book example api gateway
+      StageName: !Ref APIStageName
+  MySimpleBookFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: MySimpleBookFunction
+      Description: Book example lambda function
+      Handler: my_lambda/lambda_function.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      CodeUri: api/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableBookTest
+      Events:
+        CreateBookApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: POST
+            RestApiId:
+              Ref: MySimpleBookApi
+        GetBookApiEvent:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: GET
+            RestApiId:
+              Ref: MySimpleBookApi
+        ShowBookApiEvent:
+          Type: Api
+          Properties:
+            Path: /books/{book_id}
+            Method: GET
+            RestApiId:
+              Ref: MySimpleBookApi
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:42
+  BooksLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${MySimpleBookFunction}'
+      RetentionInDays: 30
+  MySimpleBookTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: book
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        -
+          AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "id"
+          KeyType: "HASH"
+
+Outputs:
+    MySimpleBookApi:
+        Description: "API Gateway endpoint URL for Dev environment for Book Example Function"
+        Value: !Sub "https://${MySimpleBookApi}.execute-api.${AWS::Region}.amazonaws.com/${APIStageName}/"
